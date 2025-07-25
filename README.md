@@ -1,2 +1,516 @@
 # -igcse-physics-quiz
 IGCSE Physics Quiz on Electric Charge and Current
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGCSE Physics Quiz</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .option-button {
+            background-color: #e0f2fe; /* Light blue */
+            color: #007bff; /* Darker blue text */
+            padding: 15px 20px;
+            border: 2px solid #90cdf4; /* Slightly darker border */
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+        }
+        .option-button:hover {
+            background-color: #bbdefb; /* Lighter blue on hover */
+            border-color: #63b3ed;
+        }
+        .option-button.selected {
+            background-color: #90cdf4; /* Selected blue */
+            border-color: #4299e1;
+            color: #ffffff;
+        }
+        .option-button.correct {
+            background-color: #a7f3d0; /* Green for correct */
+            border-color: #34d399;
+            color: #10b981;
+        }
+        .option-button.incorrect {
+            background-color: #fecaca; /* Red for incorrect */
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .nav-button {
+            background-color: #4299e1; /* Blue */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            flex-grow: 1;
+        }
+        .nav-button:hover {
+            background-color: #3182ce; /* Darker blue on hover */
+        }
+        .nav-button:disabled {
+            background-color: #cbd5e0; /* Gray when disabled */
+            cursor: not-allowed;
+        }
+        .submit-button {
+            background-color: #10b981; /* Green */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #059669; /* Darker green on hover */
+        }
+        .score-container {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+        .restart-button {
+            background-color: #f56565; /* Red */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .restart-button:hover {
+            background-color: #e53e3e; /* Darker red on hover */
+        }
+        .feedback {
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .feedback.correct {
+            color: #10b981; /* Green */
+        }
+        .feedback.incorrect {
+            color: #ef4444; /* Red */
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">IGCSE Physics Quiz</h1>
+        <div id="quiz-area">
+            <div class="question-text" id="question-text"></div>
+            <div class="options-container" id="options-container"></div>
+            <div class="flex justify-between items-center mt-6">
+                <span id="question-counter" class="text-lg font-medium text-gray-600"></span>
+                <button id="submit-answer-button" class="submit-button">Submit Answer</button>
+            </div>
+            <div id="feedback-message" class="feedback"></div>
+            <div class="navigation-buttons">
+                <button id="prev-button" class="nav-button" disabled>Previous</button>
+                <button id="next-button" class="nav-button" disabled>Next</button>
+            </div>
+        </div>
+        <div id="result-area" class="hidden">
+            <div class="score-container" id="final-score"></div>
+            <button id="restart-quiz-button" class="restart-button">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Array of quiz questions
+        const questions = [
+            {
+                question: "What is the SI unit of electric charge?",
+                options: ["Ampere (A)", "Volt (V)", "Ohm (Ω)", "Coulomb (C)"],
+                answer: "Coulomb (C)"
+            },
+            {
+                question: "Which statement correctly describes the flow of conventional current?",
+                options: [
+                    "From negative to positive terminal.",
+                    "From positive to negative terminal.",
+                    "The random movement of electrons.",
+                    "The movement of neutrons."
+                ],
+                answer: "From positive to negative terminal."
+            },
+            {
+                question: "An object gains electrons. What type of charge will it acquire?",
+                options: ["Positive", "Negative", "Neutral", "No change"],
+                answer: "Negative"
+            },
+            {
+                question: "What is the SI unit of potential difference?",
+                options: ["Ampere (A)", "Volt (V)", "Ohm (Ω)", "Coulomb (C)"],
+                answer: "Volt (V)"
+            },
+            {
+                question: "If a current of 2 A flows through a wire for 10 seconds, how much charge has passed through the wire?",
+                options: ["0.2 C", "5 C", "12 C", "20 C"],
+                answer: "20 C" // Q = I * t = 2 A * 10 s = 20 C
+            },
+            {
+                question: "Which device is used to measure potential difference across a component?",
+                options: ["Ammeter", "Voltmeter", "Ohmmeter", "Galvanometer"],
+                answer: "Voltmeter"
+            },
+            {
+                question: "How should a voltmeter be connected in a circuit to measure potential difference?",
+                options: [
+                    "In series with the component.",
+                    "In parallel with the component.",
+                    "Anywhere in the circuit.",
+                    "Across the power supply only."
+                ],
+                answer: "In parallel with the component."
+            },
+            {
+                question: "What is the definition of potential difference?",
+                options: [
+                    "The rate of flow of charge.",
+                    "The opposition to the flow of charge.",
+                    "The energy transferred per unit charge.",
+                    "The total charge stored in a circuit."
+                ],
+                answer: "The energy transferred per unit charge."
+            },
+            {
+                question: "A charge of 5 C moves through a potential difference of 12 V. How much work is done?",
+                options: ["0.42 J", "2.4 J", "17 J", "60 J"],
+                answer: "60 J" // W = Q * V = 5 C * 12 V = 60 J
+            },
+            {
+                question: "What is the formula for electrical power (P) in terms of voltage (V) and current (I)?",
+                options: ["P = V/I", "P = I/V", "P = V * I", "P = V + I"],
+                answer: "P = V * I"
+            },
+            {
+                question: "An electric heater has a power rating of 1500 W and is connected to a 230 V mains supply. What is the current flowing through the heater?",
+                options: ["0.15 A", "6.52 A", "15 A", "345000 A"],
+                answer: "6.52 A" // I = P / V = 1500 W / 230 V = 6.52 A (approx)
+            },
+            {
+                question: "Which of the following materials is a good electrical insulator?",
+                options: ["Copper", "Aluminium", "Graphite", "Rubber"],
+                answer: "Rubber"
+            },
+            {
+                question: "What happens when two negatively charged objects are brought close together?",
+                options: [
+                    "They attract each other.",
+                    "They repel each other.",
+                    "They neutralize each other.",
+                    "They have no effect on each other."
+                ],
+                answer: "They repel each other."
+            },
+            {
+                question: "According to Ohm's Law, if the voltage across a resistor is doubled while its resistance remains constant, what happens to the current?",
+                options: [
+                    "It halves.",
+                    "It doubles.",
+                    "It remains the same.",
+                    "It quadruples."
+                ],
+                answer: "It doubles."
+            },
+            {
+                question: "What is the total resistance of two 10 Ω resistors connected in series?",
+                options: ["5 Ω", "10 Ω", "20 Ω", "100 Ω"],
+                answer: "20 Ω" // R_total = R1 + R2 = 10 + 10 = 20 Ω
+            },
+            {
+                question: "What is the total resistance of two 10 Ω resistors connected in parallel?",
+                options: ["5 Ω", "10 Ω", "20 Ω", "100 Ω"],
+                answer: "5 Ω" // 1/R_total = 1/R1 + 1/R2 = 1/10 + 1/10 = 2/10 = 1/5 => R_total = 5 Ω
+            },
+            {
+                question: "Which of these is a safety feature designed to prevent electrical fires by breaking the circuit if the current becomes too high?",
+                options: ["Switch", "Resistor", "Fuse", "Capacitor"],
+                answer: "Fuse"
+            },
+            {
+                question: "What is the energy transferred by a 100 W light bulb in 5 seconds?",
+                options: ["20 J", "50 J", "100 J", "500 J"],
+                answer: "500 J" // Energy = Power * Time = 100 W * 5 s = 500 J
+            },
+            {
+                question: "In a simple circuit, if the resistance of the load increases, what happens to the current from the power supply?",
+                options: [
+                    "It increases.",
+                    "It decreases.",
+                    "It remains constant.",
+                    "It oscillates."
+                ],
+                answer: "It decreases."
+            },
+            {
+                question: "Why are electrical appliances often earthed?",
+                options: [
+                    "To increase their efficiency.",
+                    "To prevent them from overheating.",
+                    "To provide a safe path for current in case of a fault.",
+                    "To reduce their power consumption."
+                ],
+                answer: "To provide a safe path for current in case of a fault."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let answeredQuestions = new Array(questions.length).fill(null); // To store selected answer for each question
+        let correctAnswers = new Array(questions.length).fill(null); // To store whether the answer was correct
+
+        const quizArea = document.getElementById('quiz-area');
+        const resultArea = document.getElementById('result-area');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCounter = document.getElementById('question-counter');
+        const submitAnswerButton = document.getElementById('submit-answer-button');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const finalScore = document.getElementById('final-score');
+        const restartQuizButton = document.getElementById('restart-quiz-button');
+
+        // Function to load a question
+        function loadQuestion() {
+            // Clear previous options and feedback
+            optionsContainer.innerHTML = '';
+            feedbackMessage.textContent = '';
+            feedbackMessage.className = 'feedback'; // Reset feedback class
+
+            const q = questions[currentQuestionIndex];
+            questionText.textContent = q.question;
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+
+            // Create option buttons
+            q.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.dataset.index = index; // Store index for selection
+                button.addEventListener('click', () => selectOption(button, option));
+                optionsContainer.appendChild(button);
+            });
+
+            // Restore previously selected answer if available
+            if (answeredQuestions[currentQuestionIndex] !== null) {
+                const selectedBtn = optionsContainer.children[answeredQuestions[currentQuestionIndex].optionIndex];
+                selectedBtn.classList.add('selected');
+                selectedOption = answeredQuestions[currentQuestionIndex].optionValue;
+                submitAnswerButton.disabled = false; // Enable submit if an option was already selected
+
+                // If already answered, show correctness
+                if (correctAnswers[currentQuestionIndex] !== null) {
+                    showAnswerFeedback(correctAnswers[currentQuestionIndex]);
+                    submitAnswerButton.disabled = true; // Disable submit after showing feedback
+                    disableOptions();
+                } else {
+                    submitAnswerButton.disabled = false; // Enable submit if not yet submitted
+                }
+            } else {
+                selectedOption = null;
+                submitAnswerButton.disabled = true; // Disable submit until an option is selected
+            }
+
+            updateNavigationButtons();
+        }
+
+        // Function to handle option selection
+        function selectOption(button, optionValue) {
+            // Remove 'selected' class from all options
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Add 'selected' class to the clicked button
+            button.classList.add('selected');
+            selectedOption = optionValue;
+            submitAnswerButton.disabled = false; // Enable submit button
+        }
+
+        // Function to submit answer and check correctness
+        function submitAnswer() {
+            if (selectedOption === null) {
+                feedbackMessage.textContent = "Please select an answer!";
+                feedbackMessage.classList.add('incorrect');
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            const isCorrect = (selectedOption === q.answer);
+
+            // Store the selected answer and its correctness
+            const selectedOptionBtn = Array.from(optionsContainer.children).find(btn => btn.textContent === selectedOption);
+            answeredQuestions[currentQuestionIndex] = {
+                optionIndex: parseInt(selectedOptionBtn.dataset.index),
+                optionValue: selectedOption
+            };
+            correctAnswers[currentQuestionIndex] = isCorrect;
+
+            showAnswerFeedback(isCorrect);
+            disableOptions();
+            submitAnswerButton.disabled = true; // Disable submit after answering
+
+            // Update score only if it's the first time answering this question correctly
+            if (isCorrect && answeredQuestions[currentQuestionIndex].scoreAdded !== true) {
+                score++;
+                answeredQuestions[currentQuestionIndex].scoreAdded = true; // Mark score as added
+            } else if (!isCorrect && answeredQuestions[currentQuestionIndex].scoreAdded === true) {
+                // If previously correct and now incorrect (due to re-submission logic, though disabled here), decrement score
+                // This part is mostly for robustness if submit logic were different; with current setup, it's not hit.
+                score--;
+                answeredQuestions[currentQuestionIndex].scoreAdded = false;
+            }
+
+            // If it's the last question and submitted, show results
+            if (currentQuestionIndex === questions.length - 1 && submitAnswerButton.disabled) {
+                showResults();
+            }
+        }
+
+        // Function to show visual feedback for answers
+        function showAnswerFeedback(isCorrect) {
+            const q = questions[currentQuestionIndex];
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.classList.remove('selected'); // Remove any lingering selected class
+                if (btn.textContent === q.answer) {
+                    btn.classList.add('correct'); // Highlight correct answer
+                } else if (btn.textContent === selectedOption && !isCorrect) {
+                    btn.classList.add('incorrect'); // Highlight incorrect selected answer
+                }
+            });
+
+            if (isCorrect) {
+                feedbackMessage.textContent = "Correct!";
+                feedbackMessage.classList.add('correct');
+            } else {
+                feedbackMessage.textContent = `Incorrect. The correct answer was: ${q.answer}`;
+                feedbackMessage.classList.add('incorrect');
+            }
+        }
+
+        // Function to disable all option buttons
+        function disableOptions() {
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        // Function to enable all option buttons
+        function enableOptions() {
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+
+        // Function to update navigation button states
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            // Next button is disabled if it's the last question and it has been answered
+            nextButton.disabled = currentQuestionIndex === questions.length - 1;
+            // If it's the last question and it's answered, the submit button effectively becomes a "Show Results" button
+            if (currentQuestionIndex === questions.length - 1 && answeredQuestions[currentQuestionIndex] !== null) {
+                submitAnswerButton.textContent = "Show Results";
+                submitAnswerButton.onclick = showResults; // Change action to show results
+            } else {
+                submitAnswerButton.textContent = "Submit Answer";
+                submitAnswerButton.onclick = submitAnswer; // Reset action
+            }
+        }
+
+        // Function to show results
+        function showResults() {
+            quizArea.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            finalScore.textContent = `You scored ${score} out of ${questions.length}!`;
+        }
+
+        // Event Listeners
+        submitAnswerButton.addEventListener('click', submitAnswer);
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                enableOptions(); // Re-enable options for new question
+                loadQuestion();
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                enableOptions(); // Re-enable options for new question
+                loadQuestion();
+            }
+        });
+
+        restartQuizButton.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedOption = null;
+            answeredQuestions.fill(null);
+            correctAnswers.fill(null);
+            quizArea.classList.remove('hidden');
+            resultArea.classList.add('hidden');
+            loadQuestion();
+        });
+
+        // Initial load
+        loadQuestion();
+    </script>
+</body>
+</html>
